@@ -208,10 +208,17 @@ function loadDelayed() {
   // load anything that can be postponed to the latest here
 }
 
+function loadValidationChecks() {
+  import('./validation-checks.js').then(({ default: registerValidationChecks }) => {
+    registerValidationChecks();
+  });
+}
+
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
   loadDelayed();
+  loadValidationChecks();
 }
 
 loadPage();
