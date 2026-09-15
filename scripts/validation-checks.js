@@ -33,7 +33,7 @@ function checkCardsHaveImages(VALIDATION_SEVERITY) {
 }
 
 export default function registerValidationChecks() {
-  if (!window.qe?.validation) return;
+  if (!window?.qe?.validation) return;
   const { onValidationRequest, VALIDATION_SEVERITY } = window.qe.validation;
   onValidationRequest('validation-demo', () => [
     ...checkMissingAltText(VALIDATION_SEVERITY),
