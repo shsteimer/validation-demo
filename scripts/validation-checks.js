@@ -3,13 +3,18 @@ const EXPECTED_HEADING = 'Welcome to AEM Boilerplate';
 function checkHeadingMatches(VALIDATION_SEVERITY) {
   return [...document.querySelectorAll('main [data-prose-index]')]
     .map((el) => ({ el, heading: el.matches('h1') ? el : el.querySelector('h1') }))
-    .filter(({ heading }) => heading && heading.textContent.trim() !== EXPECTED_HEADING)
-    .map(({ el }) => ({
-      severity: VALIDATION_SEVERITY.WARN,
-      title: 'Heading',
-      message: `Heading does not match expected value: "${EXPECTED_HEADING}".`,
-      item: { proseIndex: Number(el.getAttribute('data-prose-index')) },
-    }));
+    .filter(({ heading }) => heading)
+    .map(({ el, heading }) => {
+      const matches = heading.textContent.trim() === EXPECTED_HEADING;
+      return {
+        severity: matches ? VALIDATION_SEVERITY.SUCCESS : VALIDATION_SEVERITY.WARN,
+        title: 'Heading',
+        message: matches
+          ? 'Heading matches expected value.'
+          : `Heading does not match expected value: "${EXPECTED_HEADING}".`,
+        item: { proseIndex: Number(el.getAttribute('data-prose-index')) },
+      };
+    });
 }
 
 function checkCardsCountIsEven(VALIDATION_SEVERITY) {
@@ -17,7 +22,7 @@ function checkCardsCountIsEven(VALIDATION_SEVERITY) {
     .map((block) => {
       const isEven = block.querySelectorAll(':scope > ul > li').length % 2 === 0;
       return {
-        severity: isEven ? VALIDATION_SEVERITY.INFO : VALIDATION_SEVERITY.WARN,
+        severity: isEven ? VALIDATION_SEVERITY.SUCCESS : VALIDATION_SEVERITY.WARN,
         title: 'Cards',
         message: isEven ? 'Cards block has an even number of cards.' : 'Cards block has an odd number of cards.',
         item: { blockIndex: Number(block.getAttribute('data-block-index')) },
