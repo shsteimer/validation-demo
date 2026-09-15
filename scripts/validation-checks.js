@@ -1,11 +1,6 @@
-// TEMP: da-nx's validation.js is only on the `valapi` branch so far — switch to
-// https://da.live/nx/public/plugins/quick-edit/validation.js once that merges to main.
-// eslint-disable-next-line import/no-unresolved
-import { onValidationRequest, VALIDATION_SEVERITY } from 'https://valapi--da-nx--adobe.aem.live/nx/public/plugins/quick-edit/validation.js';
-
 const MAX_HEADING_LENGTH = 70;
 
-function checkMissingAltText() {
+function checkMissingAltText(VALIDATION_SEVERITY) {
   return [...document.querySelectorAll('main [data-image-index]')]
     .map((el) => ({ el, img: el.matches('img') ? el : el.querySelector('img') }))
     .filter(({ img }) => img && !img.alt)
@@ -16,7 +11,7 @@ function checkMissingAltText() {
     }));
 }
 
-function checkLongHeadings() {
+function checkLongHeadings(VALIDATION_SEVERITY) {
   return [...document.querySelectorAll('main [data-prose-index]')]
     .filter((el) => /^H[1-6]$/.test(el.tagName) && el.textContent.trim().length > MAX_HEADING_LENGTH)
     .map((el) => ({
@@ -26,7 +21,7 @@ function checkLongHeadings() {
     }));
 }
 
-function checkCardsHaveImages() {
+function checkCardsHaveImages(VALIDATION_SEVERITY) {
   return [...document.querySelectorAll('main .cards[data-block-index]')]
     .filter((block) => [...block.querySelectorAll(':scope > ul > li')]
       .some((card) => !card.querySelector('.cards-card-image img')))
@@ -38,9 +33,11 @@ function checkCardsHaveImages() {
 }
 
 export default function registerValidationChecks() {
+  if (!window.qe?.validation) return;
+  const { onValidationRequest, VALIDATION_SEVERITY } = window.qe.validation;
   onValidationRequest('validation-demo', () => [
-    ...checkMissingAltText(),
-    ...checkLongHeadings(),
-    ...checkCardsHaveImages(),
+    ...checkMissingAltText(VALIDATION_SEVERITY),
+    ...checkLongHeadings(VALIDATION_SEVERITY),
+    ...checkCardsHaveImages(VALIDATION_SEVERITY),
   ]);
 }
