@@ -2,8 +2,9 @@ const EXPECTED_HEADING = 'Welcome to AEM Boilerplate';
 
 function checkHeadingMatches(VALIDATION_SEVERITY) {
   return [...document.querySelectorAll('main [data-prose-index]')]
-    .filter((el) => el.tagName === 'H1' && el.textContent.trim() !== EXPECTED_HEADING)
-    .map((el) => ({
+    .map((el) => ({ el, heading: el.matches('h1') ? el : el.querySelector('h1') }))
+    .filter(({ heading }) => heading && heading.textContent.trim() !== EXPECTED_HEADING)
+    .map(({ el }) => ({
       severity: VALIDATION_SEVERITY.WARN,
       title: 'Heading',
       message: `Heading does not match expected value: "${EXPECTED_HEADING}".`,
