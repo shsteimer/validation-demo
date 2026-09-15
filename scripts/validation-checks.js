@@ -22,7 +22,7 @@ function checkCardsCountIsEven(VALIDATION_SEVERITY) {
     .map((block) => {
       const isEven = block.querySelectorAll(':scope > ul > li').length % 2 === 0;
       return {
-        severity: isEven ? VALIDATION_SEVERITY.SUCCESS : VALIDATION_SEVERITY.WARN,
+        severity: isEven ? VALIDATION_SEVERITY.SUCCESS : VALIDATION_SEVERITY.INFO,
         title: 'Cards',
         message: isEven ? 'Cards block has an even number of cards.' : 'Cards block has an odd number of cards.',
         item: { blockIndex: Number(block.getAttribute('data-block-index')) },
