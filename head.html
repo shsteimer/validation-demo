@@ -4,6 +4,14 @@
   move-to-http-header="true"
 />
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<!-- TEMP: redirect the hardcoded quick-edit.js import to the unmerged valapi branch for testing. Remove once merged. -->
+<script type="importmap" nonce="aem">
+{
+  "imports": {
+    "https://da.live/nx/public/plugins/quick-edit/quick-edit.js": "https://valapi--da-nx--adobe.aem.live/nx/public/plugins/quick-edit/quick-edit.js"
+  }
+}
+</script>
 <script nonce="aem" src="/scripts/aem.js" type="module"></script>
 <script nonce="aem" src="/scripts/scripts.js" type="module"></script>
 <link rel="stylesheet" href="/styles/styles.css"/>
