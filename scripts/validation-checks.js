@@ -1,13 +1,20 @@
 const EXPECTED_HEADING = 'Welcome to AEM Boilerplate';
 
-function checkHeadingMatches(VALIDATION_SEVERITY) {
+// da-nx no longer ships a severity enum (window.qe.customValidation only exposes
+// onCustomValidationRequest) -- any non-empty string is valid on the wire, but the
+// preflight host we're targeting only renders success/info/warn/error.
+const SEVERITY = {
+  SUCCESS: 'success', INFO: 'info', WARN: 'warn', ERROR: 'error',
+};
+
+function checkHeadingMatches() {
   return [...document.querySelectorAll('main [data-prose-index]')]
     .map((el) => ({ el, heading: el.matches('h1') ? el : el.querySelector('h1') }))
     .filter(({ heading }) => heading)
     .map(({ el, heading }) => {
       const matches = heading.textContent.trim() === EXPECTED_HEADING;
       return {
-        severity: matches ? VALIDATION_SEVERITY.SUCCESS : VALIDATION_SEVERITY.WARN,
+        severity: matches ? SEVERITY.SUCCESS : SEVERITY.WARN,
         title: 'Heading',
         message: matches
           ? 'Heading matches expected value.'
@@ -17,12 +24,12 @@ function checkHeadingMatches(VALIDATION_SEVERITY) {
     });
 }
 
-function checkCardsCountIsEven(VALIDATION_SEVERITY) {
+function checkCardsCountIsEven() {
   return [...document.querySelectorAll('main .cards[data-block-index]')]
     .map((block) => {
       const isEven = block.querySelectorAll(':scope > ul > li').length % 2 === 0;
       return {
-        severity: isEven ? VALIDATION_SEVERITY.SUCCESS : VALIDATION_SEVERITY.INFO,
+        severity: isEven ? SEVERITY.SUCCESS : SEVERITY.INFO,
         title: 'Cards',
         message: isEven ? 'Cards block has an even number of cards.' : 'Cards block has an odd number of cards.',
         item: { blockIndex: Number(block.getAttribute('data-block-index')) },
@@ -31,16 +38,16 @@ function checkCardsCountIsEven(VALIDATION_SEVERITY) {
 }
 
 export default function registerValidationChecks() {
-  if (!window?.qe?.validation) return;
-  const { onValidationRequest, VALIDATION_SEVERITY } = window.qe.validation;
-  onValidationRequest(() => [
+  if (!window?.qe?.customValidation) return;
+  const { onCustomValidationRequest } = window.qe.customValidation;
+  onCustomValidationRequest(() => [
     {
-      severity: VALIDATION_SEVERITY.ERROR,
+      severity: SEVERITY.ERROR,
       title: 'Custom Error',
       message: 'This is a custom validation error.',
       item: { blockIndex: 0 },
     },
-    ...checkHeadingMatches(VALIDATION_SEVERITY),
-    ...checkCardsCountIsEven(VALIDATION_SEVERITY),
+    ...checkHeadingMatches(),
+    ...checkCardsCountIsEven(),
   ]);
 }
