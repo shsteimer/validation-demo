@@ -27,8 +27,12 @@ function checkHeadingMatches() {
     });
 }
 
-function checkCardsCountIsEven() {
-  return [...document.querySelectorAll('main .cards[data-block-index]')]
+function findCardsBlocks() {
+  return [...document.querySelectorAll('main .cards[data-block-index]')];
+}
+
+function checkCardsCountIsEven(cardsBlocks) {
+  return cardsBlocks
     .map((block) => {
       const isEven = block.querySelectorAll(':scope > ul > li').length % 2 === 0;
       return {
@@ -43,14 +47,24 @@ function checkCardsCountIsEven() {
 export default function registerValidationChecks() {
   if (!window?.qe?.customValidation) return;
   const { onCustomValidationRequest } = window.qe.customValidation;
-  onCustomValidationRequest(() => [
-    {
-      severity: SEVERITY.ERROR,
-      title: 'Custom Error',
-      message: 'This is a custom validation error.',
-      item: { blockIndex: 0 },
-    },
-    ...checkHeadingMatches(),
-    ...checkCardsCountIsEven(),
-  ]);
+  onCustomValidationRequest(() => {
+    const cardsBlocks = findCardsBlocks();
+    // isValidCustomValidationItem requires a blockIndex or proseIndex on every item, so
+    // this demo item still needs one even with no cards block on the page -- 0 is a
+    // guess in that case, but points at the real cards block whenever one exists.
+    const demoBlockIndex = cardsBlocks.length
+      ? Number(cardsBlocks[0].getAttribute('data-block-index'))
+      : 0;
+
+    return [
+      {
+        severity: SEVERITY.ERROR,
+        title: 'Custom Error',
+        message: 'This is a custom validation error.',
+        item: { blockIndex: demoBlockIndex },
+      },
+      ...checkHeadingMatches(),
+      ...checkCardsCountIsEven(cardsBlocks),
+    ];
+  });
 }
