@@ -27,11 +27,19 @@ function checkHeadingMatches() {
     });
 }
 
+// Despite the name, data-block-index holds the block's raw ProseMirror position (see
+// da-live's editor-utils.js getInstrumentedHTML), not the ordinal blockIndex da-live's
+// canvasBus.editorSelectState/_scrollDocToBlock expect (the nth non-metadata block in
+// doc order) -- all blocks on the page, in order, give us that ordinal.
+function findAllBlocks() {
+  return [...document.querySelectorAll('main [data-block-index]')];
+}
+
 function findCardsBlocks() {
   return [...document.querySelectorAll('main .cards[data-block-index]')];
 }
 
-function checkCardsCountIsEven(cardsBlocks) {
+function checkCardsCountIsEven(cardsBlocks, allBlocks) {
   return cardsBlocks
     .map((block) => {
       const isEven = block.querySelectorAll(':scope > ul > li').length % 2 === 0;
@@ -39,7 +47,7 @@ function checkCardsCountIsEven(cardsBlocks) {
         severity: isEven ? SEVERITY.SUCCESS : SEVERITY.INFO,
         title: 'Cards',
         message: isEven ? 'Cards block has an even number of cards.' : 'Cards block has an odd number of cards.',
-        item: { blockIndex: Number(block.getAttribute('data-block-index')) },
+        item: { blockIndex: allBlocks.indexOf(block) },
       };
     });
 }
@@ -48,13 +56,12 @@ export default function registerValidationChecks() {
   if (!window?.qe?.customValidation) return;
   const { onCustomValidationRequest } = window.qe.customValidation;
   onCustomValidationRequest(() => {
+    const allBlocks = findAllBlocks();
     const cardsBlocks = findCardsBlocks();
     // isValidCustomValidationItem requires a blockIndex or proseIndex on every item, so
     // this demo item still needs one even with no cards block on the page -- 0 is a
     // guess in that case, but points at the real cards block whenever one exists.
-    const demoBlockIndex = cardsBlocks.length
-      ? Number(cardsBlocks[0].getAttribute('data-block-index'))
-      : 0;
+    const demoBlockIndex = cardsBlocks.length ? allBlocks.indexOf(cardsBlocks[0]) : 0;
 
     return [
       {
@@ -64,7 +71,7 @@ export default function registerValidationChecks() {
         item: { blockIndex: demoBlockIndex },
       },
       ...checkHeadingMatches(),
-      ...checkCardsCountIsEven(cardsBlocks),
+      ...checkCardsCountIsEven(cardsBlocks, allBlocks),
     ];
   });
 }
