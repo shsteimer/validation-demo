@@ -19,7 +19,10 @@ function checkHeadingMatches() {
         message: matches
           ? 'Heading matches expected value.'
           : `Heading does not match expected value: "${EXPECTED_HEADING}".`,
-        item: { proseIndex: Number(el.getAttribute('data-prose-index')) },
+        // kind isn't validated by isValidCustomValidationItem, but da-live forwards it
+        // through to the doc editor's scroll-to-element, where it upgrades a plain
+        // text-selection fallback into a full node highlight for this heading.
+        item: { proseIndex: Number(el.getAttribute('data-prose-index')), kind: 'heading' },
       };
     });
 }
